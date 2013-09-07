@@ -60,6 +60,10 @@
 #include "armctrl.h"
 #include "clock.h"
 
+#ifdef CONFIG_BCM2708_SPI_MAX7301
+#include <linux/spi/max7301.h>
+#endif
+
 #ifdef CONFIG_BCM_VC_CMA
 #include <linux/broadcom/vc_cma.h>
 #endif
@@ -546,9 +550,16 @@ static struct platform_device bcm2708_spi_device = {
 	.resource = bcm2708_spi_resources,
 };
 
-#ifdef CONFIG_BCM2708_SPIDEV
+#ifdef CONFIG_BCM2708_SPI_MAX7301
+static struct max7301_platform_data max7301_pdata = {
+	.base = -1,
+	.input_pullup_active = 0x0,
+};
+#endif
+
+#ifdef CONFIG_BCM2708_SPI
 static struct spi_board_info bcm2708_spi_devices[] = {
-#ifdef CONFIG_SPI_SPIDEV
+#ifdef CONFIG_BCM2708_SPI_SPIDEV
 	{
 		.modalias = "spidev",
 		.max_speed_hz = 500000,
@@ -561,6 +572,16 @@ static struct spi_board_info bcm2708_spi_devices[] = {
 		.bus_num = 0,
 		.chip_select = 1,
 		.mode = SPI_MODE_0,
+	}
+#endif
+#ifdef CONFIG_BCM2708_SPI_MAX7301
+	{
+		.modalias = "max7301",
+		.max_speed_hz = 26000,
+		.bus_num = 0,
+		.chip_select = 0,
+		.mode = SPI_MODE_0,
+		.platform_data = &max7301_pdata,
 	}
 #endif
 };
@@ -746,7 +767,7 @@ void __init bcm2708_init(void)
 	system_rev = boardrev;
 	system_serial_low = serial;
 
-#ifdef CONFIG_BCM2708_SPIDEV
+#ifdef CONFIG_BCM2708_SPI
 	spi_register_board_info(bcm2708_spi_devices,
 			ARRAY_SIZE(bcm2708_spi_devices));
 #endif

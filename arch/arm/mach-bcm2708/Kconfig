@@ -38,11 +38,35 @@ config BCM2708_DMAER
         help
           Enable DMA helper for accelerating X composition
 
-config BCM2708_SPIDEV
-	bool "Bind spidev to SPI0 master"
+config BCM2708_SPI
+	bool "Bind a driver to SPI0 master"
 	depends on MACH_BCM2708
 	depends on SPI
-        default y
-		help
-			Binds spidev driver to the SPI0 master
+	default y
+	help
+		Let's you select which driver to bind to SPI0 master
+
+choice
+	prompt "Bind driver to SPI0 master"
+	depends on BCM2708_SPI
+	default BCM2708_SPI_NONE
+	default BCM2708_SPI_SPIDEV if SPI_SPIDEV
+	default BCM2708_SPI_MAX7301 if GPIO_MAX7301
+
+config BCM2708_SPI_NONE
+	bool "None"
+
+config BCM2708_SPI_MAX7301
+	bool "Bind MAX7301 to SPI0 master"
+	depends on GPIO_MAX7301
+	help
+		Binds gpio-max7301 driver to the SPI0 master
+
+config BCM2708_SPIDEV
+	bool "Bind spidev to SPI0 master"
+	depends on SPI_SPIDEV
+	help
+		Binds spidev driver to the SPI0 master
+endchoice
+
 endmenu
